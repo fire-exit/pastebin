@@ -178,7 +178,7 @@ function SnippetView() {
               className="btn btn-outline"
               title="Copy code to clipboard"
             >
-              {copied ? '✓ Copied!' : '📋 Copy'}
+              {copied ? '✓ Copied!' : '⧉ Copy'}
             </button>
             <button
               onClick={handleShare}
