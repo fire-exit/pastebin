@@ -13,6 +13,7 @@ function Home() {
   const [saveStatus, setSaveStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [wordWrap, setWordWrap] = useState(true);
+  const [theme, setTheme] = useState('dark');
 
   const editorOptions = {
     selectOnLineNumbers: true,
@@ -27,6 +28,10 @@ function Home() {
       vertical: 'auto',
       horizontal: 'auto'
     }
+  };
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
   };
 
   const handleSave = async () => {
@@ -73,7 +78,7 @@ function Home() {
   };
 
   return (
-    <div className="home">
+    <div className={`home ${theme}`}>
       <div className="header">
         <h1>Simple Pastebin</h1>
         <div className="controls">
@@ -100,6 +105,18 @@ function Home() {
               title={wordWrap ? 'Disable line wrapping' : 'Enable line wrapping'}
             >
               {wordWrap ? '↩ On' : '→ Off'}
+            </button>
+          </div>
+
+          <div className="control-group">
+            <label htmlFor="theme-toggle">Theme:</label>
+            <button
+              id="theme-toggle"
+              onClick={toggleTheme}
+              className="btn btn-outline theme-toggle"
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+            >
+              {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
             </button>
           </div>
           
@@ -139,7 +156,7 @@ function Home() {
           width="100%"
           height="100%"
           language={language}
-          theme="vs-dark"
+          theme={theme === 'dark' ? 'vs-dark' : 'light'}
           value={code}
           options={editorOptions}
           onChange={(newValue) => setCode(newValue || '')}

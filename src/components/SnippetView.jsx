@@ -12,6 +12,7 @@ function SnippetView() {
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [wordWrap, setWordWrap] = useState(true);
+  const [theme, setTheme] = useState('dark');
 
   useEffect(() => {
     loadSnippet();
@@ -69,6 +70,10 @@ function SnippetView() {
     return lang ? lang.label : langValue;
   };
 
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
+  };
+
 
   const editorOptions = {
     selectOnLineNumbers: true,
@@ -83,7 +88,7 @@ function SnippetView() {
 
   if (loading) {
     return (
-      <div className="snippet-view">
+      <div className={`snippet-view ${theme}`}>
         <div className="header">
           <Link to="/" className="btn btn-secondary">← New Snippet</Link>
           <h1>Loading snippet...</h1>
@@ -98,7 +103,7 @@ function SnippetView() {
 
   if (error) {
     return (
-      <div className="snippet-view">
+      <div className={`snippet-view ${theme}`}>
         <div className="header">
           <Link to="/" className="btn btn-secondary">← New Snippet</Link>
           <h1>Error</h1>
@@ -116,38 +121,52 @@ function SnippetView() {
   }
 
   return (
-    <div className="snippet-view">
+    <div className={`snippet-view ${theme}`}>
       <div className="header">
-        <Link to="/" className="btn btn-secondary">← New Snippet</Link>
-        <div className="snippet-info">
-          <h1>Code Snippet</h1>
+        <div className="title-section">
           <div className="meta">
             <span className="language-badge">{getLanguageLabel(snippet.language)}</span>
             <span className="snippet-id">ID: {id}</span>
           </div>
         </div>
-        <div className="actions">
-          <button
-            onClick={() => setWordWrap(!wordWrap)}
-            className={`btn btn-outline wrap-toggle ${wordWrap ? 'active' : ''}`}
-            title={wordWrap ? 'Disable line wrapping' : 'Enable line wrapping'}
-          >
-            {wordWrap ? '↩ Wrap' : '→ No Wrap'}
-          </button>
-          <button
-            onClick={handleCopy}
-            className="btn btn-outline"
-            title="Copy code to clipboard"
-          >
-            {copied ? '✓ Copied!' : '📋 Copy'}
-          </button>
-          <button
-            onClick={handleShare}
-            className="btn btn-outline"
-            title="Share this snippet"
-          >
-            🔗 Share
-          </button>
+        <div className="controls">
+          <div className="control-group">
+            <button
+              onClick={() => setWordWrap(!wordWrap)}
+              className={`btn btn-outline wrap-toggle ${wordWrap ? 'active' : ''}`}
+              title={wordWrap ? 'Disable line wrapping' : 'Enable line wrapping'}
+            >
+              {wordWrap ? '↩ On' : '→ Off'}
+            </button>
+          </div>
+
+          <div className="control-group">
+            <button
+              onClick={toggleTheme}
+              className="btn btn-outline theme-toggle"
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+            >
+              {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+            </button>
+          </div>
+          
+          <div className="button-group">
+            <button
+              onClick={handleCopy}
+              className="btn btn-outline"
+              title="Copy code to clipboard"
+            >
+              {copied ? '✓ Copied!' : '📋 Copy'}
+            </button>
+            <button
+              onClick={handleShare}
+              className="btn btn-primary"
+              title="Share this snippet"
+            >
+              🔗 Share
+            </button>
+            <Link to="/" className="btn btn-secondary">← New</Link>
+          </div>
         </div>
       </div>
 
@@ -156,7 +175,7 @@ function SnippetView() {
           width="100%"
           height="100%"
           language={snippet.language}
-          theme="vs-dark"
+          theme={theme === 'dark' ? 'vs-dark' : 'light'}
           value={snippet.content}
           options={editorOptions}
         />
