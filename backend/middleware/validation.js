@@ -25,14 +25,7 @@ export const validateSnippet = (req, res, next) => {
     });
   }
   
-  // Language validation
-  const allowedLanguages = ['javascript', 'typescript', 'python', 'html', 'css', 'json', 'yaml'];
-  if (!allowedLanguages.includes(language)) {
-    return res.status(400).json({
-      success: false,
-      error: 'Unsupported language'
-    });
-  }
+  // Language validation removed - accept any language
   
   req.contentSize = contentSize;
   next();
