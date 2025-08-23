@@ -12,14 +12,7 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(compression()); // Compress responses for large payloads
-app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
-    /https:\/\/\d+-firebase-pastebin-\d+\.cluster-.+\.cloudworkstations\.dev$/,
-    /https:\/\/firebase-pastebin-\d+\.cluster-.+\.cloudworkstations\.dev$/
-  ],
-  credentials: true
-}));
+app.use(cors({origin: process.env.FRONTEND_URL || '*'}));
 app.use(express.json({ 
   limit: '2.5MB' // Slightly higher than 2MB to account for JSON overhead
 }));

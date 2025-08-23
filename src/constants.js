@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'https://3001-firebase-pastebin-1753651815053.cluster-vyr53kd25jc2yvngldrwyq6zc4.cloudworkstations.dev';
+export const API_BASE_URL = 'http://localhost:3001';
 
 export const LANGUAGES = [
   { value: 'javascript', label: 'JavaScript' },
