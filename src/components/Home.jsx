@@ -12,7 +12,7 @@ function Home() {
   const [language, setLanguage] = useState('javascript');
   const [saveStatus, setSaveStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
-  const [wordWrap, setWordWrap] = useState(true);
+  const [wordWrap, setWordWrap] = useState(false);
   const [theme, setTheme] = useState('dark');
 
   const editorOptions = {

@@ -11,7 +11,7 @@ function SnippetView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [wordWrap, setWordWrap] = useState(true);
+  const [wordWrap, setWordWrap] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [languageOverride, setLanguageOverride] = useState(null);
 
