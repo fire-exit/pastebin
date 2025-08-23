@@ -24,6 +24,6 @@ redisClient.on('disconnect', () => {
 });
 
 // Connect to Redis/Valkey
-await redisClient.connect();
+redisClient.connect().catch(console.error);
 
 export default redisClient;
