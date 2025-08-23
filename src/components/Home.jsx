@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
+import { useTheme } from '../contexts/ThemeContext.jsx';
 import { api } from '../api.js';
 import { LANGUAGES } from '../constants.js';
 
@@ -8,12 +9,12 @@ const DEFAULT_CODE = '';
 
 function Home() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [code, setCode] = useState(DEFAULT_CODE);
   const [language, setLanguage] = useState('javascript');
   const [saveStatus, setSaveStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [wordWrap, setWordWrap] = useState(false);
-  const [theme, setTheme] = useState('dark');
 
   const editorOptions = {
     selectOnLineNumbers: true,
@@ -28,10 +29,6 @@ function Home() {
       vertical: 'auto',
       horizontal: 'auto'
     }
-  };
-
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
   };
 
   const handleSave = async () => {

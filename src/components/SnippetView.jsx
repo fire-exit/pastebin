@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
+import { useTheme } from '../contexts/ThemeContext.jsx';
 import { api } from '../api.js';
 import { LANGUAGES } from '../constants.js';
 
 function SnippetView() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [snippet, setSnippet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [wordWrap, setWordWrap] = useState(false);
-  const [theme, setTheme] = useState('dark');
   const [languageOverride, setLanguageOverride] = useState(null);
 
   useEffect(() => {
@@ -69,10 +70,6 @@ function SnippetView() {
   const getLanguageLabel = (langValue) => {
     const lang = LANGUAGES.find(l => l.value === langValue);
     return lang ? lang.label : langValue;
-  };
-
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
   };
 
   const handleLanguageChange = (newLanguage) => {
