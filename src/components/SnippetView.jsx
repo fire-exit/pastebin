@@ -132,12 +132,7 @@ function SnippetView() {
   return (
     <div className={`snippet-view ${theme}`}>
       <div className="header">
-        <div className="title-section">
-          <div className="meta">
-            <span className="language-badge">{getLanguageLabel(snippet.language)}</span>
-            <span className="snippet-id">ID: {id}</span>
-          </div>
-        </div>
+        <h1>Simple Pastebin</h1>
         <div className="controls">
           <div className="control-group">
             <label htmlFor="language-select">Language:</label>
