@@ -116,7 +116,7 @@ function Home() {
               className="btn btn-outline theme-toggle"
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
             >
-              {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+              {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
             </button>
           </div>
           
