@@ -13,6 +13,7 @@ function SnippetView() {
   const [copied, setCopied] = useState(false);
   const [wordWrap, setWordWrap] = useState(true);
   const [theme, setTheme] = useState('dark');
+  const [languageOverride, setLanguageOverride] = useState(null);
 
   useEffect(() => {
     loadSnippet();
@@ -74,6 +75,14 @@ function SnippetView() {
     setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
   };
 
+  const handleLanguageChange = (newLanguage) => {
+    setLanguageOverride(newLanguage);
+  };
+
+  const getCurrentLanguage = () => {
+    return languageOverride || (snippet ? snippet.language : 'javascript');
+  };
+
 
   const editorOptions = {
     selectOnLineNumbers: true,
@@ -131,7 +140,23 @@ function SnippetView() {
         </div>
         <div className="controls">
           <div className="control-group">
+            <label htmlFor="language-select">Language:</label>
+            <select
+              id="language-select"
+              value={getCurrentLanguage()}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="language-select"
+            >
+              {LANGUAGES.map(lang => (
+                <option key={lang.value} value={lang.value}>{lang.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="control-group">
+            <label htmlFor="wrap-toggle">Line Wrap:</label>
             <button
+              id="wrap-toggle"
               onClick={() => setWordWrap(!wordWrap)}
               className={`btn btn-outline wrap-toggle ${wordWrap ? 'active' : ''}`}
               title={wordWrap ? 'Disable line wrapping' : 'Enable line wrapping'}
@@ -141,7 +166,9 @@ function SnippetView() {
           </div>
 
           <div className="control-group">
+            <label htmlFor="theme-toggle">Theme:</label>
             <button
+              id="theme-toggle"
               onClick={toggleTheme}
               className="btn btn-outline theme-toggle"
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
@@ -174,7 +201,7 @@ function SnippetView() {
         <Editor
           width="100%"
           height="100%"
-          language={snippet.language}
+          language={getCurrentLanguage()}
           theme={theme === 'dark' ? 'vs-dark' : 'light'}
           value={snippet.content}
           options={editorOptions}
