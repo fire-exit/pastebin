@@ -2,7 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
 import dotenv from 'dotenv';
+import cron from 'node-cron';
 import snippetRoutes from './routes/snippets.js';
+import { cleanupExpiredSnippets } from './services/cleanupService.js';
 
 // Load environment variables
 dotenv.config();
@@ -63,7 +65,18 @@ app.use((err, req, res, _next) => {
   });
 });
 
+// Schedule cleanup task to run every hour
+cron.schedule('0 * * * *', () => {
+  console.log('Running scheduled cleanup of expired snippets...');
+  cleanupExpiredSnippets();
+});
+
+// Run initial cleanup on startup
+console.log('Running initial cleanup of expired snippets...');
+cleanupExpiredSnippets();
+
 app.listen(PORT, () => {
   console.log(`Pastebin backend server running on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log('Cleanup scheduler: Running every hour');
 });

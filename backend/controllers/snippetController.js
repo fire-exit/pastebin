@@ -1,34 +1,46 @@
-import redisClient from '../config/valkey.js';
+import db from '../config/database.js';
 import { generateUniqueId } from '../utils/idGenerator.js';
+import { saveContent, readContent } from '../utils/fileStorage.js';
 
 export const saveSnippet = async (req, res) => {
   try {
     const { content, language, title } = req.body;
-    const id = await generateUniqueId(redisClient);
-    
-    const snippetData = {
-      content,
+    const id = generateUniqueId();
+
+    const createdAt = Date.now();
+    const expiresAt = createdAt + (14 * 24 * 60 * 60 * 1000); // 2 weeks
+
+    // Save content to filesystem
+    const filePath = await saveContent(id, content);
+
+    // Save metadata to SQLite
+    const insertStmt = db.prepare(`
+      INSERT INTO snippets (id, language, title, created_at, expires_at, file_size, views, file_path)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    insertStmt.run(
+      id,
       language,
-      title: title || null,
-      created_at: Date.now(),
-      file_size: req.contentSize
-    };
-    
-    // Store with 2-week TTL (1,209,600 seconds)
-    await redisClient.setEx(`snippet:${id}`, 1209600, JSON.stringify(snippetData));
-    await redisClient.setEx(`snippet:${id}:views`, 1209600, '0');
-    
+      title || null,
+      createdAt,
+      expiresAt,
+      req.contentSize,
+      0,
+      filePath
+    );
+
     res.json({
       success: true,
       id,
       url: `/api/snippets/${id}`,
-      expires_at: new Date(Date.now() + 1209600000).toISOString()
+      expires_at: new Date(expiresAt).toISOString()
     });
   } catch (error) {
     console.error('Error saving snippet:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Internal server error' 
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
     });
   }
 };
@@ -36,34 +48,50 @@ export const saveSnippet = async (req, res) => {
 export const getSnippet = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const [snippetData, currentViews] = await Promise.all([
-      redisClient.get(`snippet:${id}`),
-      redisClient.incr(`snippet:${id}:views`) // Atomic increment
-    ]);
-    
-    if (!snippetData) {
+
+    // Get metadata from SQLite
+    const selectStmt = db.prepare('SELECT * FROM snippets WHERE id = ?');
+    const snippet = selectStmt.get(id);
+
+    if (!snippet) {
       return res.status(404).json({
         success: false,
         error: 'Snippet not found or expired'
       });
     }
-    
-    const snippet = JSON.parse(snippetData);
+
+    // Check if snippet has expired
+    if (snippet.expires_at < Date.now()) {
+      return res.status(404).json({
+        success: false,
+        error: 'Snippet not found or expired'
+      });
+    }
+
+    // Increment view counter atomically
+    const updateStmt = db.prepare('UPDATE snippets SET views = views + 1 WHERE id = ?');
+    updateStmt.run(id);
+
+    // Read content from filesystem
+    const content = await readContent(id);
+
     res.json({
       success: true,
       snippet: {
-        id,
-        ...snippet,
-        views: currentViews,
-        created_at: new Date(snippet.created_at).toISOString()
+        id: snippet.id,
+        content,
+        language: snippet.language,
+        title: snippet.title,
+        created_at: new Date(snippet.created_at).toISOString(),
+        file_size: snippet.file_size,
+        views: snippet.views + 1 // Return incremented value
       }
     });
   } catch (error) {
     console.error('Error retrieving snippet:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Internal server error' 
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
     });
   }
 };

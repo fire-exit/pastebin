@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import db from '../config/database.js';
 
 export const generateSnippetId = () => {
   // 12 characters, URL-safe alphabet
@@ -6,11 +7,11 @@ export const generateSnippetId = () => {
   return nanoid(12);
 };
 
-export const generateUniqueId = async (redisClient) => {
+export const generateUniqueId = () => {
   let attempts = 0;
   while (attempts < 5) {
     const id = generateSnippetId();
-    const exists = await redisClient.exists(`snippet:${id}`);
+    const exists = db.prepare('SELECT id FROM snippets WHERE id = ?').get(id);
     if (!exists) return id;
     attempts++;
   }

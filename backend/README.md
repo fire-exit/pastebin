@@ -1,15 +1,17 @@
 # Pastebin Backend
 
-A Node.js Express API server using [Valkey](https://valkey.io/) for storage with automatic 2-week expiry.
+A Node.js Express API server using SQLite for metadata and filesystem for content storage, with automatic 2-week expiry.
 
 ## Features
 
 - ✅ Save code snippets with unique IDs
 - ✅ Retrieve snippets by ID with view tracking
-- ✅ Automatic 2-week expiry via Valkey TTL
+- ✅ Automatic 2-week expiry with hourly cleanup
 - ✅ 2MB file size limit with validation
 - ✅ URL-safe ID generation with collision handling
 - ✅ CORS support for frontend integration
+- ✅ SQLite for metadata storage
+- ✅ Filesystem for content storage
 
 ## Setup
 
@@ -26,17 +28,7 @@ A Node.js Express API server using [Valkey](https://valkey.io/) for storage with
    # Edit .env with your configuration
    ```
 
-3. **Start Valkey/Redis server:**
-
-   ```bash
-   # Using Docker
-   docker run -d -p 6379:6379 valkey/valkey:latest
-
-   # Or install locally and run
-   valkey-server
-   ```
-
-4. **Start the server:**
+3. **Start the server:**
 
    ```bash
    # Development
@@ -45,6 +37,8 @@ A Node.js Express API server using [Valkey](https://valkey.io/) for storage with
    # Production
    npm start
    ```
+
+   The database and data directories will be created automatically on first run.
 
 ## API Endpoints
 
@@ -103,27 +97,31 @@ GET /health
 
 ## Environment Variables
 
-- `VALKEY_URL`: Valkey/Redis connection URL (default: `redis://localhost:6379`)
 - `PORT`: Server port (default: `3001`)
 - `FRONTEND_URL`: Frontend URL for CORS (default: `http://localhost:5173`)
+- `DATABASE_PATH`: SQLite database path (optional, default: `data/pastebin.db`)
 
 ## Data Model
 
-Snippets are stored in Valkey with the following structure:
+### SQLite Database (`data/pastebin.db`)
 
-```javascript
-// Main snippet data (TTL: 2 weeks)
-`snippet:${id}` → {
-  content: "console.log('Hello');",
-  language: "javascript",
-  title: null,
-  created_at: 1703097600000,
-  file_size: 29
-}
-
-// View counter (TTL: 2 weeks)
-`snippet:${id}:views` → 42
+```sql
+CREATE TABLE snippets (
+  id TEXT PRIMARY KEY,
+  language TEXT NOT NULL,
+  title TEXT,
+  created_at INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL,
+  file_size INTEGER NOT NULL,
+  views INTEGER NOT NULL DEFAULT 0,
+  file_path TEXT NOT NULL
+);
 ```
+
+### Filesystem (`data/snippets/`)
+
+- Each snippet's content is stored as: `data/snippets/{id}.txt`
+- Files are automatically deleted when snippets expire
 
 ## Supported Languages
 
